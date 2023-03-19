@@ -5,7 +5,7 @@ import "hardhat/console.sol";
 pragma abicoder v2;
 
 contract Block4Coffee {
-    uint public sellingPrice = 1 wei;
+    uint public sellingPrice = 1 gwei;
     uint public coffeeAmount = 0;
 
     // user
@@ -13,41 +13,40 @@ contract Block4Coffee {
     int minBalance = -10 gwei;
 
     function sendMoney() external payable {
-        accountBalances[msg.sender] += int(msg.value); // TODO try overflow and msg.value bigger than max int256
+        accountBalances[msg.sender] += int(msg.value);
     }
 
     function getMoneyBack() external {
-        // TODO try when negative
         int balance = accountBalances[msg.sender];
-        require(0 < balance);
+        require(0 < balance, "You don't have money in your balance");
         accountBalances[msg.sender] = 0;
         payable(msg.sender).transfer(uint(balance));
     }
 
     function buyCoffee() external {
-        require(coffeeAmount > 0);
-        require(minBalance <= accountBalances[msg.sender] - int(sellingPrice)); // TODO try underflow and convertion
-        accountBalances[msg.sender] -= int(sellingPrice); // TODO try underflow and convertion
+        require(coffeeAmount > 0, "No coffees available");
+        require(minBalance <= accountBalances[msg.sender] - int(sellingPrice), "Not enoght money");
+        accountBalances[msg.sender] -= int(sellingPrice);
         coffeeAmount -= 1;
     }
 
     // coffee providers
     address[] coffeeProviders;
+    uint returnPerCoffee = 1 gwei;
 
     function addCoffee(uint amount, string calldata proof) external {
-        require(member(msg.sender, coffeeProviders));
+        require(member(msg.sender, coffeeProviders), "You are not a coffee provider");
+        require(isValidProof(proof), "Not valid proof");
 
-        if (isValidProof(proof)) {
-            coffeeAmount += amount; // TODO try overflow
-            payable(msg.sender).transfer(amount); // TODO try overflow
-        }
+        coffeeAmount += amount;
+        payable(msg.sender).transfer(amount * returnPerCoffee);
     }
 
     // owner
     address owner = msg.sender;
 
     function addCoffeeProvider(address newCoffeeProvider) external {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "You are not the owner");
 
         if (!member(newCoffeeProvider, coffeeProviders)) {
             coffeeProviders.push(newCoffeeProvider);
@@ -55,19 +54,14 @@ contract Block4Coffee {
     }
 
     function fixCoffeePrice(uint newPrice) external {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "You are not the owner");
         require(newPrice > 0);
-        sellingPrice = newPrice; // TODO try overflow
+        sellingPrice = newPrice * (1 gwei);
     }
 
     function changeOwner(address a) external {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "You are not the owner");
         owner = a;
-    }
-
-    function kill() external{
-        require(msg.sender == owner);
-        selfdestruct(payable(msg.sender));
     }
 
     // private
@@ -83,6 +77,7 @@ contract Block4Coffee {
     }
 
     function isValidProof(string calldata proof) pure private returns(bool) {
-        return true;
+        bytes memory stringBytes = bytes(proof);
+        return stringBytes.length != 0;
     }
 }
