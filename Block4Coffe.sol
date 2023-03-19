@@ -24,6 +24,11 @@ contract Block4Coffee {
         payable(msg.sender).transfer(balance);
     }
 
+    function buyCoffee() external {
+        require(sellingPrice <= accountBalances[msg.sender]);
+        accountBalances[msg.sender] -= sellingPrice;
+    }
+
     // coffee providers
     function addCoffee(uint amount, string calldata proof) external {
         require(member(msg.sender, coffeeProviders));
