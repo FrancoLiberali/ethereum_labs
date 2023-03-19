@@ -5,10 +5,8 @@ import "hardhat/console.sol";
 pragma abicoder v2;
 
 contract Block4Coffee {
-    address owner = msg.sender;
     uint public sellingPrice = 1 wei;
-    address[] coffeeProviders;
-    uint coffeeAmount = 0;
+    uint public coffeeAmount = 0;
 
     // user
     mapping (address => int) public accountBalances;
@@ -27,11 +25,15 @@ contract Block4Coffee {
     }
 
     function buyCoffee() external {
+        require(coffeeAmount > 0);
         require(minBalance <= accountBalances[msg.sender] - int(sellingPrice)); // TODO try underflow and convertion
         accountBalances[msg.sender] -= int(sellingPrice); // TODO try underflow and convertion
+        coffeeAmount -= 1;
     }
 
     // coffee providers
+    address[] coffeeProviders;
+
     function addCoffee(uint amount, string calldata proof) external {
         require(member(msg.sender, coffeeProviders));
 
@@ -42,6 +44,7 @@ contract Block4Coffee {
     }
 
     // owner
+    address owner = msg.sender;
 
     function addCoffeeProvider(address newCoffeeProvider) external {
         require(msg.sender == owner);
