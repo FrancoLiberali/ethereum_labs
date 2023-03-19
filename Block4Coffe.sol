@@ -6,10 +6,16 @@ pragma abicoder v2;
 
 contract Block4Coffee {
     address owner = msg.sender;
+    uint sellingPrice = 1 * (1 gwei);
+
+    function fixCoffeePrice(uint newPrice) external {
+        require(msg.sender == owner);
+        sellingPrice = newPrice;
+    }
 
     function changeOwner(address a) external {
         require(msg.sender == owner);
-        owner = a ;
+        owner = a;
     }
 
     function kill() external{
