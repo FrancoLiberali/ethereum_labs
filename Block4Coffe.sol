@@ -10,6 +10,13 @@ contract Block4Coffee {
     address[] coffeeProviders;
     uint coffeeAmount = 0;
 
+    // user
+    mapping (address => uint) public accountBalances;
+
+    function sendMoney() external payable {
+        accountBalances[msg.sender] += msg.value; // TODO try overflow
+    }
+
     // coffee providers
     function addCoffee(uint amount, string calldata proof) external {
         require(member(msg.sender, coffeeProviders));
