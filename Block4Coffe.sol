@@ -6,7 +6,7 @@ pragma abicoder v2;
 
 contract Block4Coffee {
     address owner = msg.sender;
-    uint public sellingPrice = 1 * (1 gwei);
+    uint public sellingPrice = 1 wei;
     address[] coffeeProviders;
     uint coffeeAmount = 0;
 
@@ -15,6 +15,13 @@ contract Block4Coffee {
 
     function sendMoney() external payable {
         accountBalances[msg.sender] += msg.value; // TODO try overflow
+    }
+
+    function getMoneyBack() external {
+        uint balance = accountBalances[msg.sender];
+        require(0 < balance);
+        accountBalances[msg.sender] = 0;
+        payable(msg.sender).transfer(balance);
     }
 
     // coffee providers
