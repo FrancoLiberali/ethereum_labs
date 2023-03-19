@@ -11,22 +11,24 @@ contract Block4Coffee {
     uint coffeeAmount = 0;
 
     // user
-    mapping (address => uint) public accountBalances;
+    mapping (address => int) public accountBalances;
+    int minBalance = -10 gwei;
 
     function sendMoney() external payable {
-        accountBalances[msg.sender] += msg.value; // TODO try overflow
+        accountBalances[msg.sender] += int(msg.value); // TODO try overflow and msg.value bigger than max int256
     }
 
     function getMoneyBack() external {
-        uint balance = accountBalances[msg.sender];
+        // TODO try when negative
+        int balance = accountBalances[msg.sender];
         require(0 < balance);
         accountBalances[msg.sender] = 0;
-        payable(msg.sender).transfer(balance);
+        payable(msg.sender).transfer(uint(balance));
     }
 
     function buyCoffee() external {
-        require(sellingPrice <= accountBalances[msg.sender]);
-        accountBalances[msg.sender] -= sellingPrice;
+        require(minBalance <= accountBalances[msg.sender] - int(sellingPrice)); // TODO try underflow and convertion
+        accountBalances[msg.sender] -= int(sellingPrice); // TODO try underflow and convertion
     }
 
     // coffee providers
