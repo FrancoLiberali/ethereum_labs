@@ -8,6 +8,19 @@ contract Block4Coffee {
     address owner = msg.sender;
     uint public sellingPrice = 1 * (1 gwei);
     address[] coffeeProviders;
+    uint coffeeAmount = 0;
+
+    // coffee providers
+    function addCoffee(uint amount, string calldata proof) external {
+        require(member(msg.sender, coffeeProviders));
+
+        if (isValidProof(proof)) {
+            coffeeAmount += amount; // TODO try overflow
+            payable(msg.sender).transfer(amount); // TODO try overflow
+        }
+    }
+
+    // owner
 
     function addCoffeeProvider(address newCoffeeProvider) external {
         require(msg.sender == owner);
@@ -19,7 +32,8 @@ contract Block4Coffee {
 
     function fixCoffeePrice(uint newPrice) external {
         require(msg.sender == owner);
-        sellingPrice = newPrice;
+        require(newPrice > 0);
+        sellingPrice = newPrice; // TODO try overflow
     }
 
     function changeOwner(address a) external {
@@ -32,6 +46,8 @@ contract Block4Coffee {
         selfdestruct(payable(msg.sender));
     }
 
+    // private
+
     function member(address s, address[] memory tab) pure private returns(bool) {
         uint length = tab.length;
 
@@ -40,5 +56,9 @@ contract Block4Coffee {
         }
 
         return false;
+    }
+
+    function isValidProof(string calldata proof) pure private returns(bool) {
+        return true;
     }
 }
