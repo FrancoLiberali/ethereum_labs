@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.7;
 import "hardhat/console.sol";
-pragma abicoder v2;
 
 contract Block4Coffee {
     uint public sellingPrice = 1 gwei;
