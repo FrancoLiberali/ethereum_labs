@@ -32,12 +32,15 @@ contract Block4Coffee {
     // coffee providers
     address[] coffeeProviders;
     uint returnPerCoffee = 1 gwei;
+    string[] usedProofs;
 
     function addCoffee(uint amount, string calldata proof) external {
         require(member(msg.sender, coffeeProviders), "You are not a coffee provider");
-        require(isValidProof(proof), "Not valid proof");
+        require(isValidProof(proof, usedProofs), "Not valid proof");
 
         coffeeAmount += amount;
+        usedProofs.push(proof);
+
         payable(msg.sender).transfer(amount * returnPerCoffee);
     }
 
@@ -75,8 +78,18 @@ contract Block4Coffee {
         return false;
     }
 
-    function isValidProof(string calldata proof) pure private returns(bool) {
+    function isValidProof(string calldata proof, string[] memory proofTab) pure private returns(bool) {
         bytes memory stringBytes = bytes(proof);
-        return stringBytes.length != 0;
+        return stringBytes.length != 0 && !alreadyUsed(proof, proofTab);
+    }
+
+    function alreadyUsed(string calldata proof, string[] memory proofTab) pure private returns(bool) {
+        uint length = proofTab.length;
+
+        for (uint i=0; i<length; i++) {
+            if (keccak256(abi.encodePacked(proofTab[i])) == keccak256(abi.encodePacked(proof))) return true;
+        }
+
+        return false;
     }
 }
